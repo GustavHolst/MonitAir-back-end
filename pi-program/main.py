@@ -2,9 +2,14 @@
 # main python library and time modules
 import bme680
 import time
+import requests
+import statistics
 
 # this device ID
-device_ID = af4eb1
+device_ID = 'af4eb1'
+
+# api endpoint
+api_endpoint = "192.168.230.214"
 
 # create sensor instance
 # failover to second i2c address on fail
@@ -23,12 +28,16 @@ sensor.set_gas_heater_temperature(320) #celcius
 sensor.set_gas_heater_duration(150) #ms
 sensor.select_gas_heater_profile(0)
 
+
+
 # establish start time
 start_time = time.time()
 now_time = time.time()
 burn_in_time = 600 #seconds
 
+# empty list for gas values
 burn_in_data = []
+gas_baseline = None
 
 try:
     print(start_time, ": starting burn-in")
@@ -39,10 +48,46 @@ try:
             burn_in_data.append(gas)
             print('Gas: {0} Ohms'.format(gas))
             time.sleep(1)
-    
+
+    # baseline is mean final 50 vals
     gas_baseline = sum(burn_in_data[-50:]) / 50.0
-    
-    print("Gas baseline:", gas_baseline)
-    
+
+
+
 except KeyboardInterrupt:
     pass
+
+print("Gas baseline: {0:.2f} Ohms".format(gas_baseline))
+
+while True:
+    try:
+        start_time = time.time()
+        now_time = time.time()
+        post_interval = 10 #seconds
+        temp_list = []
+        pressure_list = []
+        humidity_list = []
+        tvoc_list = []
+        while now_time < start_time + post_interval:
+            if sensor.get_sensor_data():
+                temp_list.append(sensor.data.temperature)
+                pressure_list.append(sensor.data.pressure)
+                humidity_list.append(sensor.data.humidity)
+            if sensor.data.heat_stable:
+                tvoc_list.append(sensor.data.gas_resistance)
+            time.sleep(1)
+            now_time = time.time()
+        try:
+            temp_mean = statistics.mean(temp_list)
+            pressure_mean = statistics.mean(pressure_list)
+            humidity_mean = statistics.mean(humidity_list)
+            tvoc_mean = statistics.mean(tvoc_list)
+        except statistics.StatisticsError:
+            pass
+        sendup = {
+            device_ID: [temp_mean, pressure_mean, humidity_mean, tvoc_mean, gas_baseline]
+            }
+        r = requests.post(api_endpoint, data = sendup)
+        
+    except KeyboardInterrupt:
+        pass
