@@ -29,21 +29,18 @@ sensor.set_gas_heater_temperature(320)  # celcius
 sensor.set_gas_heater_duration(150)  # ms
 sensor.select_gas_heater_profile(0)
 
-<< << << < HEAD
 print("Setting temp baseline (60 sec)")
 initial_temp_readings = []
 for n in range(120):
     initial_temp_readings.append(sensor.data.temperature)
     time.sleep(0.5)
 baseline_temp = statistics.mean(initial_temp_readings)
-== == == =
->>>>>> > abd0b959a27ef612f015140416b4c1027a3a71f8
 
 
 # establish start time
 start_time = time.time()
 now_time = time.time()
-burn_in_time = 600  # seconds
+burn_in_time = 300  # seconds
 
 
 # empty list for gas values
@@ -104,7 +101,11 @@ while True:
                         'baseline_temp': baseline_temp
                         }
         }
-        r = requests.post(api_endpoint, data=sendup)
+        logFile = open('log', 'a')
+        logFile.write(str(time.time() + '\n'))
+        logFile.write(str(sendup) + '\n')
+        logFile.close()
+        # r = requests.post(api_endpoint, data=sendup)
 
     except KeyboardInterrupt:
         pass
