@@ -1,3 +1,4 @@
+#! python3
 import psycopg2
 from config import config
 conn = psycopg2.connect("dbname=airdata_test user=bc password=password")
@@ -17,7 +18,7 @@ def connect():
         print('Connecting to the PostgreSQL database...')
         conn = psycopg2.connect(**params)
       
-        # create a cursor
+        # create a cursorW
         cur = conn.cursor()
         
    # execute a statement
