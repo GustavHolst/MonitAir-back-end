@@ -9,7 +9,7 @@ import statistics
 device_ID = 'af4eb1'
 
 # api endpoint
-api_endpoint = "192.168.230.214"
+api_endpoint = "https://192.168.230.214"
 
 # create sensor instance
 # failover to second i2c address on fail
@@ -27,6 +27,14 @@ sensor.set_gas_status(bme680.ENABLE_GAS_MEAS)
 sensor.set_gas_heater_temperature(320)  # celcius
 sensor.set_gas_heater_duration(150)  # ms
 sensor.select_gas_heater_profile(0)
+
+print("Setting temp baseline (60 sec)")
+initial_temp_readings = []
+for n in range(120):
+    initial_temp_readings.append(sensor.data.temperature)
+    time.sleep(0.5)
+baseline_temp = statistics.mean(initial_temp_readings)
+
 
 # establish start time
 start_time = time.time()
@@ -82,7 +90,7 @@ while True:
             pass
         sendup = {
             device_ID: [temp_mean, pressure_mean,
-                        humidity_mean, tvoc_mean, gas_baseline]
+                        humidity_mean, tvoc_mean, gas_baseline, baseline_temp]
         }
         r = requests.post(api_endpoint, data=sendup)
 
