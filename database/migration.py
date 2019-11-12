@@ -41,7 +41,6 @@ def create_tables():
         cur = conn.cursor()
         # create table one by one
         for command in commands:
-            print(command)
             cur.execute(command)
         # close communication with the PostgreSQL database server
         cur.close()

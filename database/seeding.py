@@ -3,17 +3,30 @@ from config import config
  
 
 data = {
-     'firstname' : "Barry",
+     'first_name' : "Barry",
      'surname' : "Chuckle",
      'email' : "BigBoiBaz@gmail.com",
      'sensor_id' : 1,
-     'username' : "BazziChuck"
+     'username' : "BazziChuck",
+     'password' : "RIP"
  }
+
+data2 = [
+     "Barry",
+     "Chuckle",
+     "BigBoiBaz@gmail.com",
+     1,
+     "BazziChuck",
+     "RIP"
+
+ ]
  
 def insert_data(data):
     """ Insert new user into users table"""
-    sql = """INSERT INTO user(firstname, surname, email, sensor_id,username,password)
-             VALUES(%s) RETURNING user_id;"""
+    sql = """INSERT INTO users(first_name, surname, email, sensor_id,username,password)
+             VALUES(%s, %s, %s, %s, %s, %s) RETURNING *;
+             SELECT * FROM users;
+             """
     conn = None
     user_id = None
     try:
@@ -24,9 +37,9 @@ def insert_data(data):
         # create a new cursor
         cur = conn.cursor()
         # execute the INSERT statement
-        cur.execute(sql, (data.firstname,data.surname,data.email,data.sensor_id,data.username,data.password))
+        cur.execute(sql, (data['first_name'],data['surname'],data['email'],data['sensor_id'],data['username'],data['password']))
         # get the generated id back
-        user_id = cur.fetchone()[0]
+        users = cur.fetchmany(100)
         # commit the changes to the database
         conn.commit()
         # close communication with the database
@@ -37,4 +50,6 @@ def insert_data(data):
         if conn is not None:
             conn.close()
  
-    return user_id
+    return users
+
+print(insert_data(data))
