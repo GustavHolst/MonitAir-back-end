@@ -29,21 +29,18 @@ sensor.set_gas_heater_temperature(320)  # celcius
 sensor.set_gas_heater_duration(150)  # ms
 sensor.select_gas_heater_profile(0)
 
-<< << << < HEAD
 print("Setting temp baseline (60 sec)")
 initial_temp_readings = []
 for n in range(120):
     initial_temp_readings.append(sensor.data.temperature)
     time.sleep(0.5)
 baseline_temp = statistics.mean(initial_temp_readings)
-== == == =
->>>>>> > abd0b959a27ef612f015140416b4c1027a3a71f8
 
 
 # establish start time
 start_time = time.time()
 now_time = time.time()
-burn_in_time = 600  # seconds
+burn_in_time = 300  # seconds
 
 
 # empty list for gas values
@@ -61,7 +58,7 @@ try:
             time.sleep(1)
 
     # baseline is mean final 50 vals
-    gas_baseline = sum(burn_in_data[-50:]) / 50.0
+    gas_baseline = statistics.mean(burn_in_data[-50:])
 
 
 except KeyboardInterrupt:
@@ -98,13 +95,17 @@ while True:
         sendup = {
             device_ID: {'temp_mean': temp_mean,
                         'pressure_mean': pressure_mean,
-                        'humidity_mean': humidity_list,
+                        'humidity_mean': humidity_mean,
                         'tvoc_mean': tvoc_mean,
                         'gas_baseline': gas_baseline,
-                        'baseline_temp': baseline_temp
+                        'baseline_temp': baseline_temp,
+                        'timestamp': now_time
                         }
         }
-        r = requests.post(api_endpoint, data=sendup)
+        logFile = open('log', 'a')
+        logFile.write(str(sendup) + '\n')
+        logFile.close()
+        # r = requests.post(api_endpoint, data=sendup)
 
     except KeyboardInterrupt:
         pass
