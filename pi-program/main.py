@@ -102,7 +102,7 @@ while True:
                         }
         }
         logFile = open('log', 'a')
-        logFile.write(str(time.time() + '\n'))
+        logFile.write(str(time.time()) + '\n')
         logFile.write(str(sendup) + '\n')
         logFile.close()
         # r = requests.post(api_endpoint, data=sendup)
