@@ -24,6 +24,7 @@ sensor.set_pressure_oversample(bme680.OS_4X)
 sensor.set_temperature_oversample(bme680.OS_8X)
 sensor.set_filter(bme680.FILTER_SIZE_3)
 sensor.set_gas_status(bme680.ENABLE_GAS_MEAS)
+
 sensor.set_gas_heater_temperature(320) #celcius
 sensor.set_gas_heater_duration(150) #ms
 sensor.select_gas_heater_profile(0)
@@ -34,6 +35,7 @@ sensor.select_gas_heater_profile(0)
 start_time = time.time()
 now_time = time.time()
 burn_in_time = 600 #seconds
+
 
 # empty list for gas values
 burn_in_data = []
@@ -53,7 +55,6 @@ try:
     gas_baseline = sum(burn_in_data[-50:]) / 50.0
 
 
-
 except KeyboardInterrupt:
     pass
 
@@ -63,6 +64,8 @@ while True:
     try:
         start_time = time.time()
         now_time = time.time()
+
+
         post_interval = 10 #seconds
         temp_list = []
         pressure_list = []
@@ -85,9 +88,11 @@ while True:
         except statistics.StatisticsError:
             pass
         sendup = {
+
             device_ID: [temp_mean, pressure_mean, humidity_mean, tvoc_mean, gas_baseline]
             }
         r = requests.post(api_endpoint, data = sendup)
         
     except KeyboardInterrupt:
         pass
+
