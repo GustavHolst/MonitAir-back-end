@@ -4,12 +4,15 @@ import bme680
 import time
 import requests
 import statistics
+import socket
 
 # this device ID
 device_ID = 'af4eb1'
 
 # api endpoint
 api_endpoint = "https://192.168.230.214"
+socket_endpoint = "something"
+portNumber = 1234
 
 # create sensor instance
 # failover to second i2c address on fail
@@ -17,6 +20,11 @@ try:
     sensor = bme680.BME680(bme680.I2C_ADDR_PRIMARY)
 except IOError:
     sensor = bme680.BME680(bme680.I2C_ADDR_SECONDARY)
+
+# establish socket with server
+# serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# serversocket.bind(socket.gethostname(), portNumber)
+# serversocket.listen(5)
 
 # set sensor parameters - these increase the signal to noise ratio
 sensor.set_humidity_oversample(bme680.OS_2X)
@@ -34,7 +42,7 @@ initial_temp_readings = []
 for n in range(120):
     initial_temp_readings.append(sensor.data.temperature)
     time.sleep(0.5)
-baseline_temp = statistics.mean(initial_temp_readings)
+baseline_temp = round(statistics.mean(initial_temp_readings), 3)
 
 
 # establish start time
@@ -93,11 +101,11 @@ while True:
         except statistics.StatisticsError:
             pass
         sendup = {
-            device_ID: {'temp_mean': temp_mean,
-                        'pressure_mean': pressure_mean,
-                        'humidity_mean': humidity_mean,
-                        'tvoc_mean': tvoc_mean,
-                        'gas_baseline': gas_baseline,
+            device_ID: {'temp_mean': round(temp_mean, 3),
+                        'pressure_mean': round(pressure_mean, 3),
+                        'humidity_mean': round(humidity_mean, 3),
+                        'tvoc_mean': round(tvoc_mean, 3),
+                        'gas_baseline': round(gas_baseline, 3),
                         'baseline_temp': baseline_temp,
                         'timestamp': now_time
                         }
