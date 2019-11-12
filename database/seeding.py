@@ -1,6 +1,14 @@
 import psycopg2
 from config import config
  
+
+data = {
+     'firstname' : "Barry",
+     'surname' : "Chuckle",
+     'email' : "BigBoiBaz@gmail.com",
+     'sensor_id' : 1,
+     'username' : "BazziChuck"
+ }
  
 def insert_data(data):
     """ Insert new user into users table"""
