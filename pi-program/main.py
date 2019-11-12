@@ -58,7 +58,7 @@ try:
             time.sleep(1)
 
     # baseline is mean final 50 vals
-    gas_baseline = sum(burn_in_data[-50:]) / 50.0
+    gas_baseline = statistics.mean(burn_in_data[-50:])
 
 
 except KeyboardInterrupt:
