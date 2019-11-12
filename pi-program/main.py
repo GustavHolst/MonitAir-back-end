@@ -9,7 +9,7 @@ import statistics
 device_ID = 'af4eb1'
 
 # api endpoint
-api_endpoint = "192.168.230.214"
+api_endpoint = "https://192.168.230.214"
 
 # create sensor instance
 # failover to second i2c address on fail
@@ -25,16 +25,25 @@ sensor.set_temperature_oversample(bme680.OS_8X)
 sensor.set_filter(bme680.FILTER_SIZE_3)
 sensor.set_gas_status(bme680.ENABLE_GAS_MEAS)
 
-sensor.set_gas_heater_temperature(320) #celcius
-sensor.set_gas_heater_duration(150) #ms
+sensor.set_gas_heater_temperature(320)  # celcius
+sensor.set_gas_heater_duration(150)  # ms
 sensor.select_gas_heater_profile(0)
 
+<< << << < HEAD
+print("Setting temp baseline (60 sec)")
+initial_temp_readings = []
+for n in range(120):
+    initial_temp_readings.append(sensor.data.temperature)
+    time.sleep(0.5)
+baseline_temp = statistics.mean(initial_temp_readings)
+== == == =
+>>>>>> > abd0b959a27ef612f015140416b4c1027a3a71f8
 
 
 # establish start time
 start_time = time.time()
 now_time = time.time()
-burn_in_time = 600 #seconds
+burn_in_time = 600  # seconds
 
 
 # empty list for gas values
@@ -65,8 +74,7 @@ while True:
         start_time = time.time()
         now_time = time.time()
 
-
-        post_interval = 10 #seconds
+        post_interval = 10  # seconds
         temp_list = []
         pressure_list = []
         humidity_list = []
@@ -88,11 +96,15 @@ while True:
         except statistics.StatisticsError:
             pass
         sendup = {
+            device_ID: {'temp_mean': temp_mean,
+                        'pressure_mean': pressure_mean,
+                        'humidity_mean': humidity_list,
+                        'tvoc_mean': tvoc_mean,
+                        'gas_baseline': gas_baseline,
+                        'baseline_temp': baseline_temp
+                        }
+        }
+        r = requests.post(api_endpoint, data=sendup)
 
-            device_ID: [temp_mean, pressure_mean, humidity_mean, tvoc_mean, gas_baseline]
-            }
-        r = requests.post(api_endpoint, data = sendup)
-        
     except KeyboardInterrupt:
         pass
-
