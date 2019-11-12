@@ -95,10 +95,11 @@ while True:
         sendup = {
             device_ID: {'temp_mean': temp_mean,
                         'pressure_mean': pressure_mean,
-                        'humidity_mean': humidity_list,
+                        'humidity_mean': humidity_mean,
                         'tvoc_mean': tvoc_mean,
                         'gas_baseline': gas_baseline,
-                        'baseline_temp': baseline_temp
+                        'baseline_temp': baseline_temp,
+                        'timestamp': now_time
                         }
         }
         logFile = open('log', 'a')
