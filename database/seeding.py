@@ -1,6 +1,6 @@
 import psycopg2
 from config import config
-# from data.testdata import outputs
+from moreTestData import sample
 
 # print(outputs)
 
@@ -46,28 +46,25 @@ def insert_user(user):
     return users
 
 
-# insert_user(user)
-
-data = {'af4eb1': {'temp_mean': 30, 'pressure_mean': 989.243, 'humidity_mean': 31.3771,
-                   'tvoc_mean': 130796.487, 'gas_baseline': 130521.653, 'timestamp': 1573564899}}
+insert_user(user)
 
 
 def insert_data(data):
-    sql = """INSERT INTO data(reading_id,temperature,pressure,humidity,TVOC,gasBaseLine)
-              VALUES(%s, %s, %s, %s, %s, %s) RETURNING *;
+    sql = """INSERT INTO data(temperature,pressure,humidity,TVOC, user_id)
+              VALUES(%s, %s, %s, %s, %s) RETURNING *;
               SELECT * FROM data;
               """
     conn = None
-    # reading_id = None
-    print(data)
+
     try:
         params = config()
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
         cur.execute(sql, (data['af4eb1']['temp_mean'], data['af4eb1']['pressure_mean'], data['af4eb1']
-                          ['humidity_mean'], data['af4eb1']['tvoc_mean'], data['af4eb1']['gas_baseline'], ['1']))
-        # data = cur.fetchmany(200)
-        # conn.commit()
+                          ['humidity_mean'], data['af4eb1']['tvoc_mean'], '1'))
+        data = cur.fetchmany(200)
+        cur.execute('select * from data;')
+        conn.commit()
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error, '***')
@@ -78,6 +75,7 @@ def insert_data(data):
     return data
 
 
-insert_data(data)
-# for i in outputs:
-#    insert_data(i)
+# print(insert_data(data))
+
+for i in sample:
+    insert_data(i)
