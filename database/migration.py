@@ -1,6 +1,7 @@
 import psycopg2
 from config import config
 
+
 def create_tables():
     commands = (
         """
@@ -13,8 +14,7 @@ def create_tables():
             username VARCHAR(40),
             password VARCHAR(40)
         )
-        """
-        ,
+        """,
         """
         CREATE TABLE data (
             reading_id SERIAL PRIMARY KEY,
@@ -30,7 +30,7 @@ def create_tables():
 
         );
         """
-     
+
     )
     conn = None
     try:
@@ -51,7 +51,7 @@ def create_tables():
     finally:
         if conn is not None:
             conn.close()
- 
- 
+
+
 if __name__ == '__main__':
     create_tables()
