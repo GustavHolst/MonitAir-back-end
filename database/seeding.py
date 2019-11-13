@@ -17,7 +17,7 @@ user = {
 
 def insert_user(user):
     sql = """INSERT INTO users(first_name, surname, email, sensor_id, username, password)
-             VALUES(%s, %s, %s, %s, %s, %s) RETURNING *;
+             VALUES(%s, %s, %s, %d, %s, %s) RETURNING *;
              SELECT * FROM users;
              """
     conn = None
@@ -50,7 +50,7 @@ def insert_user(user):
 
 def insert_data(data):
     sql = """INSERT INTO data(reading_id,temperature,pressure,humidity,TVOC,gasBaseLine,user_id)
-             V  print()ALUES(%s, %s, %s, %s, %s, %s, %s) RETURNING *;
+             VALUES(%d, %d, %d, %d, %d, %d, %d) RETURNING *;
              SELECT * FROM data;
              """
     conn = None
