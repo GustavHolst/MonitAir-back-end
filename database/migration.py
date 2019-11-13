@@ -22,7 +22,6 @@ def create_tables():
             pressure FLOAT,
             humidity FLOAT,
             TVOC FLOAT,
-            gasBaseline FLOAT,
             user_id int,
             FOREIGN KEY (user_id)
             REFERENCES users (user_id)
