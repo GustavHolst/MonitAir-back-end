@@ -1,6 +1,6 @@
 import psycopg2
 from config import config
-from data.testdata import outputs
+# from data.testdata import outputs
 
 # print(outputs)
 
@@ -17,12 +17,11 @@ user = {
 
 def insert_user(user):
     sql = """INSERT INTO users(first_name, surname, email, sensor_id, username, password)
-             VALUES(%s, %s, %s, %d, %s, %s) RETURNING *;
+             VALUES(%s, %s, %s, %s, %s, %s) RETURNING *;
              SELECT * FROM users;
              """
     conn = None
-    # user_id = None
-  #  print('first_name')
+
     try:
         # read userbase configuration
         params = config()
@@ -44,29 +43,34 @@ def insert_user(user):
     finally:
         if conn is not None:
             conn.close()
-
     return users
 
 
+# insert_user(user)
+
+data = {'af4eb1': {'temp_mean': 30, 'pressure_mean': 989.243, 'humidity_mean': 31.3771,
+                   'tvoc_mean': 130796.487, 'gas_baseline': 130521.653, 'timestamp': 1573564899}}
+
+
 def insert_data(data):
-    sql = """INSERT INTO data(reading_id,temperature,pressure,humidity,TVOC,gasBaseLine,user_id)
-             VALUES(%d, %d, %d, %d, %d, %d, %d) RETURNING *;
-             SELECT * FROM data;
-             """
+    sql = """INSERT INTO data(reading_id,temperature,pressure,humidity,TVOC,gasBaseLine)
+              VALUES(%s, %s, %s, %s, %s, %s) RETURNING *;
+              SELECT * FROM data;
+              """
     conn = None
     # reading_id = None
+    print(data)
     try:
-        print(data['af4eb1']['gas_baseline'])
         params = config()
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
         cur.execute(sql, (data['af4eb1']['temp_mean'], data['af4eb1']['pressure_mean'], data['af4eb1']
-                          ['humidity_mean'], data['af4eb1']['tvoc_mean'], data['af4eb1']['gas_baseline'], 1))
-        data = cur.fetchmany(200)
-        conn.commit()
+                          ['humidity_mean'], data['af4eb1']['tvoc_mean'], data['af4eb1']['gas_baseline'], ['1']))
+        # data = cur.fetchmany(200)
+        # conn.commit()
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+        print(error, '***')
     finally:
         if conn is not None:
             conn.close()
@@ -74,5 +78,6 @@ def insert_data(data):
     return data
 
 
-for i in outputs:
-    insert_data(i)
+insert_data(data)
+# for i in outputs:
+#    insert_data(i)
