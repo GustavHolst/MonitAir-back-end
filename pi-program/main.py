@@ -67,8 +67,6 @@ try:
 
     # baseline is mean final 50 vals
     gas_baseline = statistics.mean(burn_in_data[-50:])
-
-
 except KeyboardInterrupt:
     pass
 
@@ -101,13 +99,13 @@ while True:
         except statistics.StatisticsError:
             pass
         sendup = {
-            device_ID: {'temp_mean': round(temp_mean, 3),
-                        'pressure_mean': round(pressure_mean, 3),
-                        'humidity_mean': round(humidity_mean, 3),
-                        'tvoc_mean': round(tvoc_mean, 3),
-                        'gas_baseline': round(gas_baseline, 3),
-                        'baseline_temp': baseline_temp,
-                        'timestamp': now_time
+            device_ID: {'temp_mean': round(temp_mean, 2),
+                        'pressure_mean': round(pressure_mean, 2),
+                        'humidity_mean': round(humidity_mean, 2),
+                        'tvoc_mean': round(tvoc_mean, 2),
+                        'gas_baseline': round(gas_baseline, 2),
+                        'baseline_temp': round(baseline_temp, 2),
+                        'timestamp': round(now_time)
                         }
         }
         logFile = open('log', 'a')
