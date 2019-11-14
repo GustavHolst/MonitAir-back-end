@@ -130,7 +130,7 @@ while True:
         # logFile.close()
 
         r = requests.post(api_endpoint, json=sendup)
-        print(now_time + r.status_code + r.text)
+        print(now_time, r.status_code, r.text)
 
     except KeyboardInterrupt:
         pass
