@@ -151,11 +151,15 @@ def get_readings(sensor_id):
     return jsonify(result)
 
 
-# @app.route("/most_recent_reading/<sensor_id>", methods=["GET"])
-# def get_most_recent_reading(sensor_id):
-#     most_recent_reading = Reading.query.filter_by(sensor_id=sensor_id)
-#     print(most_recent_reading)
-#     return reading_schema.jsonify(most_recent_reading)
+@app.route("/most_recent_reading/<sensor_id>", methods=["GET"])
+def get_most_recent_reading(sensor_id):
+    most_recent_reading = (
+        Reading.query.filter_by(sensor_id=sensor_id)
+        .order_by(Reading.timestamp.desc())
+        .first()
+    )
+    print(most_recent_reading)
+    return reading_schema.jsonify(most_recent_reading)
 
 
 # Run server
