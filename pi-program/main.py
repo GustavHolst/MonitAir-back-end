@@ -124,10 +124,13 @@ while True:
                         'timestamp': round(now_time)
                         }
         }
-        logFile = open('log', 'a')
-        logFile.write(str(sendup) + '\n')
-        logFile.close()
+
+        # logFile = open('log', 'a')
+        # logFile.write(str(sendup) + '\n')
+        # logFile.close()
+
         r = requests.post(api_endpoint, data=sendup)
+        print(r.status_code)
 
     except KeyboardInterrupt:
         pass
