@@ -114,7 +114,7 @@ def post_user():
     db.session.add(new_user)
     db.session.commit()
 
-    return user_schema.jsonify(new_user)
+    return user_schema.jsonify(new_user), 201
 
 
 @app.route("/user/<username>", methods=["GET"])
