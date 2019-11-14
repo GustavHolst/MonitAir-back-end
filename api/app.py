@@ -146,7 +146,7 @@ def post_reading(sensor_id):
 
 @app.route("/reading/<sensor_id>", methods=["GET"])
 def get_readings(sensor_id):
-    all_readings_for_sensor = Reading.query.filter_by(sensor_id=sensor_id)
+    all_readings_for_sensor = Reading.query.filter_by(sensor_id=sensor_id).limit(8640)
     result = readings_schema.dump(all_readings_for_sensor)
     return jsonify(result)
 
