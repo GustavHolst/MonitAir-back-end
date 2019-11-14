@@ -4,15 +4,32 @@ import bme680
 import time
 import requests
 import statistics
-import socket
 
-# this device ID
-device_ID = 'af4eb1'
+# get device ID
+
+
+def getserial():
+    # get serial /proc/cpuinfo
+    cpuserial = ""
+    try:
+        f = open('/proc/cpuinfo', 'r')
+        for line in f:
+            if line[0:6] == 'Serial':
+                cpuserial = line[10:26]
+        f.close()
+    except:
+        cpuserial = "ERROR000000000"
+    return cpuserial
+
+
+device_ID = getserial()
 
 # api endpoint
-api_endpoint = "https://192.168.230.214"
-socket_endpoint = "something"
-portNumber = 1234
+api_endpoint = "http://brejconies.pythonanywhere.com/reading/{0}".format(
+    device_ID)
+port = 80
+
+print(api_endpoint)
 
 # create sensor instance
 # failover to second i2c address on fail
@@ -64,7 +81,6 @@ try:
             burn_in_data.append(gas)
             print('Gas: {0} Ohms'.format(gas))
             time.sleep(1)
-
     # baseline is mean final 50 vals
     gas_baseline = statistics.mean(burn_in_data[-50:])
 except KeyboardInterrupt:
@@ -111,7 +127,7 @@ while True:
         logFile = open('log', 'a')
         logFile.write(str(sendup) + '\n')
         logFile.close()
-        # r = requests.post(api_endpoint, data=sendup)
+        r = requests.post(api_endpoint, data=sendup)
 
     except KeyboardInterrupt:
         pass
