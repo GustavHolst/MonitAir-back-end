@@ -17,8 +17,6 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 # Users Class / Model
-
-
 class User(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(40))
@@ -69,16 +67,12 @@ class Reading(db.Model):
 
 
 # User Schema (using marshmallow)
-
-
 class UserSchema(ma.Schema):
     class Meta:
         fields = ("user_id", "first_name", "surname", "email", "sensor_id", "username")
 
 
 # Reading Schema
-
-
 class ReadingSchema(ma.Schema):
     class Meta:
         fields = (
@@ -145,8 +139,8 @@ def post_reading(sensor_id):
 
     db.session.add(new_reading)
     db.session.commit()
-    print(reading_schema)
-    # return reading_schema.jsonify({"reading": new_reading})
+
+    print(new_reading)
     return reading_schema.jsonify(new_reading), 201
 
 
@@ -154,15 +148,14 @@ def post_reading(sensor_id):
 def get_readings(sensor_id):
     all_readings_for_sensor = Reading.query.filter_by(sensor_id=sensor_id)
     result = readings_schema.dump(all_readings_for_sensor)
-    print(result)
-    return jsonify({"readings": result})
+    return jsonify(result)
 
 
-@app.route("/most_recent_reading/<sensor_id>", methods=["GET"])
-def get_most_recent_reading(sensor_id):
-    most_recent_reading = Reading.query.filter_by(sensor_id=sensor_id)
-    print(most_recent_reading)
-    return reading_schema.jsonify(most_recent_reading)
+# @app.route("/most_recent_reading/<sensor_id>", methods=["GET"])
+# def get_most_recent_reading(sensor_id):
+#     most_recent_reading = Reading.query.filter_by(sensor_id=sensor_id)
+#     print(most_recent_reading)
+#     return reading_schema.jsonify(most_recent_reading)
 
 
 # Run server
