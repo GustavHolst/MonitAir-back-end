@@ -52,6 +52,22 @@ class Reading(db.Model):
         self.tvoc_mean = tvoc_mean
         self.sensor_id = sensor_id
 
+class ArchiveReading(db.Model):
+    reading_id = db.Column(db.Integer, primary_key=True)
+    temp_mean = db.Column(db.Float)
+    pressure_mean = db.Column(db.Float)
+    humidity_mean = db.Column(db.Float)
+    tvoc_mean = db.Column(db.Float)
+    sensor_id = db.Column(db.String(20), db.ForeignKey("user.sensor_id"))
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __init__(self, temp_mean, pressure_mean, humidity_mean, tvoc_mean, sensor_id):
+        self.temp_mean = temp_mean
+        self.pressure_mean = pressure_mean
+        self.humidity_mean = humidity_mean
+        self.tvoc_mean = tvoc_mean
+        self.sensor_id = sensor_id
+
 
 # User Schema (using marshmallow)
 class UserSchema(ma.Schema):
@@ -71,12 +87,24 @@ class ReadingSchema(ma.Schema):
             "sensor_id",
             "timestamp",
         )
-
+class ArchiveReadingSchema(ma.Schema):
+    class Meta:
+        fields = (
+            "reading_id",
+            "temp_mean",
+            "pressure_mean",
+            "humidity_mean",
+            "tvoc_mean",
+            "sensor_id",
+            "timestamp",
+        )
 
 # Init Schema
 user_schema = UserSchema()  # May need to add strict=True to both invokations
 reading_schema = ReadingSchema()
 readings_schema = ReadingSchema(many=True)
+archiveReading_schema = ArchiveReadingSchema()
+archiveReadings_schema = ArchiveReadingSchema(many=True)
 
 
 @app.route("/user", methods=["POST"])
