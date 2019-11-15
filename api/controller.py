@@ -23,22 +23,12 @@ def select_user(username):
 
 
 def insert_reading(sensor_id):
-    temp_mean = request.json[sensor_id]["temp_mean"]
+    temp_mean = request.json[sensor_id]["temp_mean"] - 10.5
     pressure_mean = request.json[sensor_id]["pressure_mean"]
     humidity_mean = request.json[sensor_id]["humidity_mean"]
     tvoc_mean = request.json[sensor_id]["tvoc_mean"]
-    gas_baseline = request.json[sensor_id]["gas_baseline"]
-    baseline_temp = request.json[sensor_id]["baseline_temp"]
 
-    new_reading = Reading(
-        temp_mean,
-        pressure_mean,
-        humidity_mean,
-        tvoc_mean,
-        sensor_id,
-        baseline_temp,
-        gas_baseline,
-    )
+    new_reading = Reading(temp_mean, pressure_mean, humidity_mean, tvoc_mean, sensor_id)
 
     db.session.add(new_reading)
     db.session.commit()
@@ -50,6 +40,7 @@ def insert_reading(sensor_id):
 def select_readings(sensor_id):
     all_readings_for_sensor = Reading.query.filter_by(sensor_id=sensor_id).limit(8640)
     result = readings_schema.dump(all_readings_for_sensor)
+    print(result)
     return jsonify(result)
 
 

@@ -44,26 +44,13 @@ class Reading(db.Model):
     tvoc_mean = db.Column(db.Float)
     sensor_id = db.Column(db.String(20), db.ForeignKey("user.sensor_id"))
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    baseline_temp = db.Column(db.Float)
-    gas_baseline = db.Column(db.Float)
 
-    def __init__(
-        self,
-        temp_mean,
-        pressure_mean,
-        humidity_mean,
-        tvoc_mean,
-        sensor_id,
-        baseline_temp,
-        gas_baseline,
-    ):
+    def __init__(self, temp_mean, pressure_mean, humidity_mean, tvoc_mean, sensor_id):
         self.temp_mean = temp_mean
         self.pressure_mean = pressure_mean
         self.humidity_mean = humidity_mean
         self.tvoc_mean = tvoc_mean
         self.sensor_id = sensor_id
-        self.baseline_temp = baseline_temp
-        self.gas_baseline = gas_baseline
 
 
 # User Schema (using marshmallow)
@@ -83,8 +70,6 @@ class ReadingSchema(ma.Schema):
             "tvoc_mean",
             "sensor_id",
             "timestamp",
-            "baseline_temp",
-            "gas_baseline",
         )
 
 
