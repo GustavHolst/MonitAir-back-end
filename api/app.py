@@ -90,76 +90,43 @@ class ReadingSchema(ma.Schema):
 
 # Init Schema
 user_schema = UserSchema()  # May need to add strict=True to both invokations
-# users_schema = UserSchema(many=True)
 reading_schema = ReadingSchema()
 readings_schema = ReadingSchema(many=True)
 
 
 @app.route("/user", methods=["POST"])
 def post_user():
-    first_name = request.json["first_name"]
-    surname = request.json["surname"]
-    email = request.json["email"]
-    sensor_id = request.json["sensor_id"]
-    username = request.json["username"]
+    import controller
 
-    new_user = User(first_name, surname, email, sensor_id, username)
-
-    db.session.add(new_user)
-    db.session.commit()
-
-    return user_schema.jsonify(new_user), 201
+    return controller.insert_user(request)
 
 
 @app.route("/user/<username>", methods=["GET"])
 def get_user(username):
-    user = User.query.filter_by(username=username).first()
-    return user_schema.jsonify(user)
+    import controller
+
+    return controller.select_user(username)
 
 
 @app.route("/reading/<sensor_id>", methods=["POST"])
 def post_reading(sensor_id):
-    sensor_id = sensor_id
-    temp_mean = request.json[sensor_id]["temp_mean"]
-    pressure_mean = request.json[sensor_id]["pressure_mean"]
-    humidity_mean = request.json[sensor_id]["humidity_mean"]
-    tvoc_mean = request.json[sensor_id]["tvoc_mean"]
-    gas_baseline = request.json[sensor_id]["gas_baseline"]
-    baseline_temp = request.json[sensor_id]["baseline_temp"]
+    import controller
 
-    new_reading = Reading(
-        temp_mean,
-        pressure_mean,
-        humidity_mean,
-        tvoc_mean,
-        sensor_id,
-        baseline_temp,
-        gas_baseline,
-    )
-
-    db.session.add(new_reading)
-    db.session.commit()
-
-    print(new_reading)
-    return reading_schema.jsonify(new_reading), 201
+    return controller.insert_reading(sensor_id)
 
 
 @app.route("/reading/<sensor_id>", methods=["GET"])
 def get_readings(sensor_id):
-    all_readings_for_sensor = Reading.query.filter_by(sensor_id=sensor_id).limit(8640)
-    result = readings_schema.dump(all_readings_for_sensor)
-    return jsonify(result)
+    import controller
+
+    return controller.select_readings(sensor_id)
 
 
 @app.route("/most_recent_reading/<sensor_id>", methods=["GET"])
 def get_most_recent_reading(sensor_id):
-    most_recent_reading = (
-        Reading.query.filter_by(sensor_id=sensor_id)
-        .order_by(Reading.timestamp.desc())
-        .first()
-    )
-    print(most_recent_reading)
-    return reading_schema.jsonify(most_recent_reading)
+    import controller
+
+    return controller.select_most_recent_reading(sensor_id)
 
 
 # Run server
