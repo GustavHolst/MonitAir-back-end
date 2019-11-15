@@ -75,7 +75,8 @@ class ReadingSchema(ma.Schema):
 
 
 # Init Schema
-user_schema = UserSchema()  # May need to add strict=True to both invokations
+user_schema = UserSchema()
+users_schema = UserSchema(many=True)
 reading_schema = ReadingSchema()
 readings_schema = ReadingSchema(many=True)
 
@@ -85,6 +86,13 @@ def post_user():
     import controller
 
     return controller.insert_user(request)
+
+
+@app.route("/user", methods=["GET"])
+def get_all_users():
+    import controller
+
+    return controller.select_all_users()
 
 
 @app.route("/user/<username>", methods=["GET"])

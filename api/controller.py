@@ -1,4 +1,12 @@
-from app import User, user_schema, Reading, reading_schema, readings_schema, db
+from app import (
+    User,
+    user_schema,
+    users_schema,
+    Reading,
+    reading_schema,
+    readings_schema,
+    db,
+)
 from flask import request, jsonify
 
 
@@ -21,6 +29,12 @@ def insert_user(request):
 def select_user(username):
     user = User.query.filter_by(username=username).first()
     return user_schema.jsonify(user)
+
+
+def select_all_users():
+    all_users = User.query.all()
+    print(all_users)
+    return users_schema.jsonify(all_users)
 
 
 def insert_reading(sensor_id):
