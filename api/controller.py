@@ -3,13 +3,14 @@ from flask import request, jsonify
 
 
 def insert_user(request):
+    user_id = request.json["user_id"]
     first_name = request.json["first_name"]
     surname = request.json["surname"]
     email = request.json["email"]
     sensor_id = request.json["sensor_id"]
     username = request.json["username"]
 
-    new_user = User(first_name, surname, email, sensor_id, username)
+    new_user = User(user_id, first_name, surname, email, sensor_id, username)
 
     db.session.add(new_user)
     db.session.commit()
