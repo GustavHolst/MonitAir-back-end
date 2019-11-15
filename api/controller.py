@@ -1,15 +1,24 @@
-from app import User, user_schema, Reading, reading_schema, readings_schema, db
+from app import (
+    User,
+    user_schema,
+    users_schema,
+    Reading,
+    reading_schema,
+    readings_schema,
+    db,
+)
 from flask import request, jsonify
 
 
 def insert_user(request):
+    user_id = request.json["user_id"]
     first_name = request.json["first_name"]
     surname = request.json["surname"]
     email = request.json["email"]
     sensor_id = request.json["sensor_id"]
     username = request.json["username"]
 
-    new_user = User(first_name, surname, email, sensor_id, username)
+    new_user = User(user_id, first_name, surname, email, sensor_id, username)
 
     db.session.add(new_user)
     db.session.commit()
@@ -20,6 +29,12 @@ def insert_user(request):
 def select_user(username):
     user = User.query.filter_by(username=username).first()
     return user_schema.jsonify(user)
+
+
+def select_all_users():
+    all_users = User.query.all()
+    print(all_users)
+    return users_schema.jsonify(all_users)
 
 
 def insert_reading(sensor_id):

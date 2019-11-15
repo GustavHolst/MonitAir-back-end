@@ -18,14 +18,15 @@ ma = Marshmallow(app)
 
 # Users Class / Model
 class User(db.Model):
-    user_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(40), primary_key=True)
     first_name = db.Column(db.String(40))
     surname = db.Column(db.String(40))
     email = db.Column(db.String(60), unique=True)
     sensor_id = db.Column(db.String(20), unique=True)
     username = db.Column(db.String(40), unique=True)
 
-    def __init__(self, first_name, surname, email, sensor_id, username):
+    def __init__(self, user_id, first_name, surname, email, sensor_id, username):
+        self.user_id = user_id
         self.first_name = first_name
         self.surname = surname
         self.email = email
@@ -74,7 +75,8 @@ class ReadingSchema(ma.Schema):
 
 
 # Init Schema
-user_schema = UserSchema()  # May need to add strict=True to both invokations
+user_schema = UserSchema()
+users_schema = UserSchema(many=True)
 reading_schema = ReadingSchema()
 readings_schema = ReadingSchema(many=True)
 
@@ -84,6 +86,13 @@ def post_user():
     import controller
 
     return controller.insert_user(request)
+
+
+@app.route("/user", methods=["GET"])
+def get_all_users():
+    import controller
+
+    return controller.select_all_users()
 
 
 @app.route("/user/<username>", methods=["GET"])
