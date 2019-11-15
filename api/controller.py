@@ -33,14 +33,12 @@ def insert_reading(sensor_id):
     db.session.add(new_reading)
     db.session.commit()
 
-    print(new_reading)
     return reading_schema.jsonify(new_reading), 201
 
 
 def select_readings(sensor_id):
     all_readings_for_sensor = Reading.query.filter_by(sensor_id=sensor_id).limit(8640)
     result = readings_schema.dump(all_readings_for_sensor)
-    print(result)
     return jsonify(result)
 
 
