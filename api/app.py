@@ -2,12 +2,18 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
 import os
 
 # Initialise the app
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
-
+archiver = BackgroundScheduler()
+def archiveDayJob():
+    import utils
+    return utils.archiveDay
+archiver.add_job(archiveDayJob, 'cron', second = 0, minute = 2, hour = 13)
+archiver.start()
 # Database initialisation
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
     basedir, "db.sqlite"
