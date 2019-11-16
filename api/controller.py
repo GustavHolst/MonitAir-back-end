@@ -8,6 +8,7 @@ from app import (
     db,
 )
 from flask import request, jsonify
+from sqlalchemy.exc import IntegrityError, InvalidRequestError
 
 
 def insert_user(request):
@@ -19,9 +20,15 @@ def insert_user(request):
     username = request.json["username"]
 
     new_user = User(user_id, first_name, surname, email, sensor_id, username)
-
-    db.session.add(new_user)
-    db.session.commit()
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return (
+            jsonify({"Msg": "Username, Sensor ID, Email or User_ID already in use"}),
+            400,
+        )
 
     return user_schema.jsonify(new_user), 201
 
@@ -33,7 +40,6 @@ def select_user(username):
 
 def select_all_users():
     all_users = User.query.all()
-    print(all_users)
     return users_schema.jsonify(all_users)
 
 
@@ -52,7 +58,19 @@ def insert_reading(sensor_id):
 
 
 def select_readings(sensor_id):
-    all_readings_for_sensor = Reading.query.filter_by(sensor_id=sensor_id).limit(8640)
+    measurement = request.args.get("measurement")
+    if (
+        measurement != "humidity_mean"
+        and measurement != "pressure_mean"
+        and measurement != "temp_mean"
+        and measurement != "tvoc_mean"
+    ):
+        return {"msg": "Please ensure you include a valid measurement"}, 400
+    all_readings_for_sensor = (
+        Reading.query.with_entities(getattr(Reading, measurement), Reading.timestamp)
+        .filter_by(sensor_id=sensor_id)
+        .limit(8640)
+    )
     result = readings_schema.dump(all_readings_for_sensor)
     return jsonify(result)
 
