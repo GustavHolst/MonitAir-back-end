@@ -5,21 +5,21 @@ import time
 import requests
 import statistics
 
-# get device ID
+# get serial /proc/cpuinfo
 
 
 def getserial():
-    # get serial /proc/cpuinfo
-    cpuserial = ""
+    piSerialNum = None
     try:
-        f = open('/proc/cpuinfo', 'r')
-        for line in f:
+        cpuInfoFile = open('/proc/cpuinfo', 'r')
+        for line in cpuInfoFile:
             if line[0:6] == 'Serial':
-                cpuserial = line[10:26]
-        f.close()
+                piSerialNum = line[10:26]
+        cpuInfoFile.close()
     except:
-        cpuserial = "ERROR000000000"
-    return cpuserial
+        piSerialNum = "error00000000000"
+    print("Pi serial number: {0}".format(piSerialNum))
+    return piSerialNum
 
 
 device_ID = getserial()
@@ -38,11 +38,6 @@ try:
 except IOError:
     sensor = bme680.BME680(bme680.I2C_ADDR_SECONDARY)
 
-# establish socket with server
-# serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# serversocket.bind(socket.gethostname(), portNumber)
-# serversocket.listen(5)
-
 # set sensor parameters - these increase the signal to noise ratio
 sensor.set_humidity_oversample(bme680.OS_2X)
 sensor.set_pressure_oversample(bme680.OS_4X)
@@ -57,16 +52,17 @@ sensor.select_gas_heater_profile(0)
 print("Setting temp baseline (60 sec)")
 initial_temp_readings = []
 for n in range(120):
-    initial_temp_readings.append(sensor.data.temperature)
-    time.sleep(0.5)
+    if sensor.get_sensor_data():
+        print(n, sensor.data.temperature)
+        initial_temp_readings.append(sensor.data.temperature)
+        time.sleep(0.5)
 baseline_temp = round(statistics.mean(initial_temp_readings), 3)
-
+print("Baseline temp is {0:.2f}", baseline_temp)
 
 # establish start time
 start_time = time.time()
 now_time = time.time()
 burn_in_time = 300  # seconds
-
 
 # empty list for gas values
 burn_in_data = []
@@ -124,13 +120,12 @@ while True:
                         'timestamp': round(now_time)
                         }
         }
-
+        # KEEP THESE COMMENTS
         # logFile = open('log', 'a')
         # logFile.write(str(sendup) + '\n')
         # logFile.close()
 
         r = requests.post(api_endpoint, json=sendup)
         print(now_time, r.status_code, r.text)
-
     except KeyboardInterrupt:
         pass
