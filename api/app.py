@@ -17,6 +17,8 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 # Users Class / Model
+
+
 class User(db.Model):
     user_id = db.Column(db.String(40), primary_key=True)
     first_name = db.Column(db.String(40))
@@ -57,7 +59,8 @@ class Reading(db.Model):
 # User Schema (using marshmallow)
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ("user_id", "first_name", "surname", "email", "sensor_id", "username")
+        fields = ("user_id", "first_name", "surname",
+                  "email", "sensor_id", "username")
 
 
 # Reading Schema
