@@ -35,8 +35,6 @@ class User(db.Model):
 
 
 # Reading Class / Model
-
-
 class Reading(db.Model):
     reading_id = db.Column(db.Integer, primary_key=True)
     temp_mean = db.Column(db.Float)
@@ -81,6 +79,7 @@ reading_schema = ReadingSchema()
 readings_schema = ReadingSchema(many=True)
 
 
+# Routes
 @app.route("/user", methods=["POST"])
 def post_user():
     import controller
