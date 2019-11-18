@@ -12,8 +12,8 @@ def getserial():
     piSerialNum = None
     try:
         cpuInfoFile = open('/proc/cpuinfo', 'r')
-        for eachLine in cpuInfoFile:
-            if eachLine[0:6] == 'Serial':
+        for line in cpuInfoFile:
+            if line[0:6] == 'Serial':
                 piSerialNum = line[10:26]
         cpuInfoFile.close()
     except:
