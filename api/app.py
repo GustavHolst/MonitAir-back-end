@@ -20,11 +20,11 @@ ma = Marshmallow(app)
 
 
 class User(db.Model):
-    user_id = db.Column(db.String(40), primary_key=True)
+    user_id = db.Column(db.String(40))
     first_name = db.Column(db.String(40))
     surname = db.Column(db.String(40))
     email = db.Column(db.String(60), unique=True)
-    sensor_id = db.Column(db.String(20), unique=True)
+    sensor_id = db.Column(db.String(20), unique=True, primary_key=True)
     username = db.Column(db.String(40), unique=True)
 
     def __init__(self, user_id, first_name, surname, email, sensor_id, username):
@@ -37,22 +37,22 @@ class User(db.Model):
 
 
 # Reading Class / Model
-
-
 class Reading(db.Model):
     reading_id = db.Column(db.Integer, primary_key=True)
     temp_mean = db.Column(db.Float)
     pressure_mean = db.Column(db.Float)
     humidity_mean = db.Column(db.Float)
-    tvoc_mean = db.Column(db.Float)
+    total_quality_mean = db.Column(db.Float)
     sensor_id = db.Column(db.String(20), db.ForeignKey("user.sensor_id"))
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    def __init__(self, temp_mean, pressure_mean, humidity_mean, tvoc_mean, sensor_id):
+    def __init__(
+        self, temp_mean, pressure_mean, humidity_mean, total_quality_mean, sensor_id
+    ):
         self.temp_mean = temp_mean
         self.pressure_mean = pressure_mean
         self.humidity_mean = humidity_mean
-        self.tvoc_mean = tvoc_mean
+        self.total_quality_mean = total_quality_mean
         self.sensor_id = sensor_id
 
 
@@ -71,7 +71,7 @@ class ReadingSchema(ma.Schema):
             "temp_mean",
             "pressure_mean",
             "humidity_mean",
-            "tvoc_mean",
+            "total_quality_mean",
             "sensor_id",
             "timestamp",
         )
@@ -84,6 +84,7 @@ reading_schema = ReadingSchema()
 readings_schema = ReadingSchema(many=True)
 
 
+# Routes
 @app.route("/user", methods=["POST"])
 def post_user():
     import controller
