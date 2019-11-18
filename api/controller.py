@@ -9,6 +9,7 @@ from app import (
 )
 from flask import request, jsonify, abort
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from datetime import datetime, timedelta
 
 
 def insert_user(request):
@@ -44,7 +45,8 @@ def select_all_users():
 
 
 def insert_reading(sensor_id):
-    temp_mean = request.json[sensor_id]["temp_mean"] - 10.5
+    db.session.rollback()
+    temp_mean = request.json[sensor_id]["temp_mean"]
     pressure_mean = request.json[sensor_id]["pressure_mean"]
     humidity_mean = request.json[sensor_id]["humidity_mean"]
     tvoc_mean = request.json[sensor_id]["tvoc_mean"]
@@ -66,12 +68,27 @@ def select_readings(sensor_id):
         and measurement != "tvoc_mean"
     ):
         return {"msg": "Please ensure you include a valid measurement"}, 400
-    all_readings_for_sensor = (
+
+    lower_limit = request.args.get("lower_limit")[:10] + " 00:00:00"
+    upper_limit = request.args.get("upper_limit")[:10] + " 23:59:59"
+
+    lower_limit = datetime.strptime(lower_limit, "%Y-%m-%d %H:%M:%S")
+    upper_limit = datetime.strptime(upper_limit, "%Y-%m-%d %H:%M:%S")
+
+    print(lower_limit)
+    print(type(lower_limit))
+    print(upper_limit)
+    print(type(upper_limit))
+
+    readings_for_sensor = (
         Reading.query.with_entities(getattr(Reading, measurement), Reading.timestamp)
         .filter_by(sensor_id=sensor_id)
-        .limit(8640)
+        .filter(Reading.timestamp > lower_limit)
+        .filter(Reading.timestamp < upper_limit)
     )
-    result = readings_schema.dump(all_readings_for_sensor)
+
+    result = readings_schema.dump(readings_for_sensor)
+
     if not len(result):
         abort(404, "no readings")
         # return {"msg": "no readings found for this sensor ID"}, 404
