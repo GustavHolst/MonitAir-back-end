@@ -75,7 +75,8 @@ try:
         if sensor.get_sensor_data() and sensor.data.heat_stable:
             gas = sensor.data.gas_resistance
             burn_in_data.append(gas)
-            print('Gas: {0} Ohms'.format(gas))
+            print('Gas resistance: {0} Ohms'.format(gas))
+            print("Gas index: {0} units".format(sensor.data.gas_index))
             time.sleep(1)
     # baseline is mean final 50 vals
     gas_baseline = statistics.mean(burn_in_data[-50:])
