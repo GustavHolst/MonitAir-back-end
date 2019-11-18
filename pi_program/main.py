@@ -159,7 +159,7 @@ while True:
         sendup = {'temp_mean': round(temp_mean, 2),
                   'pressure_mean': round(pressure_mean, 2),
                   'humidity_mean': round(humidity_mean, 2),
-                  'totalQuality_mean': round(totalQuality_mean, 2),
+                  'total_quality_mean': round(totalQuality_mean, 2),
                   'gas_baseline': round(gas_baseline, 2),
                   'baseline_temp': round(baseline_temp, 2),
                   'timestamp': round(now_time)
