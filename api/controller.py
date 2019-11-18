@@ -56,12 +56,16 @@ def select_all_users():
 def insert_reading(sensor_id):
     db.session.rollback()
     try:
-        temp_mean = round(request.json["temp_mean"])
-        pressure_mean = round(request.json["pressure_mean"])
-        humidity_mean = round(request.json["humidity_mean"])
-        total_quality_mean = round(100 - request.json["total_quality_mean"] * 5)
+        temp_mean = request.json["temp_mean"]
+        pressure_mean = request.json["pressure_mean"]
+        humidity_mean = request.json["humidity_mean"]
+        total_quality_mean = (100 - request.json["total_quality_mean"]) * 5
         new_reading = Reading(
-            temp_mean, pressure_mean, humidity_mean, total_quality_mean, sensor_id
+            round(temp_mean),
+            round(pressure_mean),
+            round(humidity_mean),
+            round(total_quality_mean),
+            sensor_id,
         )
         db.session.add(new_reading)
         db.session.commit()
