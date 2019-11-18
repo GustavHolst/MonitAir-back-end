@@ -156,16 +156,15 @@ while True:
             totalQuality_mean = statistics.mean(totalQuality_list)
         except statistics.StatisticsError:
             pass
-        sendup = {
-            device_ID: {'temp_mean': round(temp_mean, 2),
-                        'pressure_mean': round(pressure_mean, 2),
-                        'humidity_mean': round(humidity_mean, 2),
-                        'totalQuality_mean': round(totalQuality_mean, 2),
-                        'gas_baseline': round(gas_baseline, 2),
-                        'baseline_temp': round(baseline_temp, 2),
-                        'timestamp': round(now_time)
-                        }
-        }
+        sendup = {'temp_mean': round(temp_mean, 2),
+                  'pressure_mean': round(pressure_mean, 2),
+                  'humidity_mean': round(humidity_mean, 2),
+                  'totalQuality_mean': round(totalQuality_mean, 2),
+                  'gas_baseline': round(gas_baseline, 2),
+                  'baseline_temp': round(baseline_temp, 2),
+                  'timestamp': round(now_time)
+                  }
+
         # KEEP THESE COMMENTS
         # logFile = open('log', 'a')
         # logFile.write(str(sendup) + '\n')
