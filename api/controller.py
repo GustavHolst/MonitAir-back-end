@@ -10,6 +10,7 @@ from app import (
 from flask import request, jsonify, abort
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from datetime import datetime, timedelta
+import json
 
 
 def insert_user(request):
@@ -36,6 +37,8 @@ def insert_user(request):
 
 def select_user(username):
     user = User.query.filter_by(username=username).first()
+    if json.dumps(user) == "null":
+        return {"msg": "user not found"}, 404
     return user_schema.jsonify(user)
 
 
@@ -74,11 +77,6 @@ def select_readings(sensor_id):
 
     lower_limit = datetime.strptime(lower_limit, "%Y-%m-%d %H:%M:%S")
     upper_limit = datetime.strptime(upper_limit, "%Y-%m-%d %H:%M:%S")
-
-    print(lower_limit)
-    print(type(lower_limit))
-    print(upper_limit)
-    print(type(upper_limit))
 
     readings_for_sensor = (
         Reading.query.with_entities(getattr(Reading, measurement), Reading.timestamp)
