@@ -12,8 +12,8 @@ def getserial():
     piSerialNum = None
     try:
         cpuInfoFile = open('/proc/cpuinfo', 'r')
-        for line in cpuInfoFile:
-            if line[0:6] == 'Serial':
+        for eachLine in cpuInfoFile:
+            if eachLine[0:6] == 'Serial':
                 piSerialNum = line[10:26]
         cpuInfoFile.close()
     except:
@@ -80,7 +80,7 @@ try:
         if sensor.get_sensor_data() and sensor.data.heat_stable:
             gas = sensor.data.gas_resistance
             burn_in_data.append(gas)
-            print('Gas resistance: {0} Ohms'.format(gas))
+            print('Gas resistance: {0} ohms'.format(gas))
             time.sleep(1)
     # baseline is mean final 50 vals
     gas_baseline = statistics.mean(burn_in_data[-50:])
@@ -101,11 +101,16 @@ while True:
         start_time = time.time()
         now_time = time.time()
 
+        # set the delay between server POST requests
         post_interval = 10  # seconds
+
+        # create some empty list for the averages
         temp_list = []
         pressure_list = []
         humidity_list = []
         totalQuality_list = []
+
+        # get the readings
         while now_time < start_time + post_interval:
             if sensor.get_sensor_data():
                 temp_list.append(sensor.data.temperature)
@@ -140,10 +145,6 @@ while True:
                 # Calculate air_quality_score.
                 air_quality_score = hum_score + gas_score
 
-                print('Gas: {0:.2f} Ohms,humidity: {1:.2f} %RH,air quality: {2:.2f}'.format(
-                    gas,
-                    hum,
-                    air_quality_score))
                 time.sleep(1)
                 now_time = time.time()
 
