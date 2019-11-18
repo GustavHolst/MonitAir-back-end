@@ -7,7 +7,7 @@ from app import (
     readings_schema,
     db,
 )
-from flask import request, jsonify
+from flask import request, jsonify, abort
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 
 
@@ -72,6 +72,9 @@ def select_readings(sensor_id):
         .limit(8640)
     )
     result = readings_schema.dump(all_readings_for_sensor)
+    if not len(result):
+        abort(404, "no readings")
+        # return {"msg": "no readings found for this sensor ID"}, 404
     return jsonify(result)
 
 
@@ -81,4 +84,6 @@ def select_most_recent_reading(sensor_id):
         .order_by(Reading.timestamp.desc())
         .first()
     )
+    if not most_recent_reading:
+        return {"msg": "no readings found for this sensor ID"}, 404
     return reading_schema.jsonify(most_recent_reading)
