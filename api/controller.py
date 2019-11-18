@@ -39,10 +39,10 @@ def insert_user(request):
 def select_user(username):
     user = User.query.filter_by(username=username).first()
 
-    if json.dumps(user) == "null":
-        return {"msg": "user not found"}, 404
+    if isinstance(user, User):
+        return user_schema.jsonify(user)
 
-    return user_schema.jsonify(user)
+    return {"msg": "user not found"}, 404
 
 
 def select_all_users():
@@ -53,12 +53,12 @@ def select_all_users():
 def insert_reading(sensor_id):
     db.session.rollback()
     try:
-        temp_mean = request.json[sensor_id]["temp_mean"]
-        pressure_mean = request.json[sensor_id]["pressure_mean"]
-        humidity_mean = request.json[sensor_id]["humidity_mean"]
-        tvoc_mean = request.json[sensor_id]["tvoc_mean"]
+        temp_mean = request.json["temp_mean"]
+        pressure_mean = request.json["pressure_mean"]
+        humidity_mean = request.json["humidity_mean"]
+        total_quality_mean = request.json["total_quality_mean"]
         new_reading = Reading(
-            temp_mean, pressure_mean, humidity_mean, tvoc_mean, sensor_id
+            temp_mean, pressure_mean, humidity_mean, total_quality_mean, sensor_id
         )
         db.session.add(new_reading)
         db.session.commit()
@@ -66,8 +66,7 @@ def insert_reading(sensor_id):
         return reading_schema.jsonify(new_reading), 201
 
     except KeyError:
-        return "Key Error"
-        # return {"msg": "Info missing from post reading request"}, 400
+        return {"msg": "Info missing from post reading request"}, 400
 
 
 def select_readings(sensor_id):
@@ -91,7 +90,10 @@ def select_readings(sensor_id):
         result = readings_schema.dump(readings_for_sensor)
 
         if not len(result):
-            return {"msg": "no readings found for this sensor ID"}, 404
+            return (
+                {"msg": "no readings found for this sensor ID for the given timeframe"},
+                404,
+            )
         return jsonify(result)
 
     except TypeError:
@@ -118,5 +120,8 @@ def select_most_recent_reading(sensor_id):
         .first()
     )
     if not most_recent_reading:
-        return {"msg": "no readings found for this sensor ID"}, 404
+        return (
+            {"msg": "no readings found for this sensor ID"},
+            404,
+        )
     return reading_schema.jsonify(most_recent_reading)
