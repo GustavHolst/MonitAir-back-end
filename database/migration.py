@@ -1,6 +1,7 @@
 import psycopg2
 from config import config
 
+
 def create_tables():
     commands = (
         """
@@ -13,8 +14,7 @@ def create_tables():
             username VARCHAR(40),
             password VARCHAR(40)
         )
-        """
-        ,
+        """,
         """
         CREATE TABLE data (
             reading_id SERIAL PRIMARY KEY,
@@ -22,15 +22,13 @@ def create_tables():
             pressure FLOAT,
             humidity FLOAT,
             TVOC FLOAT,
-            gasBaseline FLOAT,
             user_id int,
             FOREIGN KEY (user_id)
             REFERENCES users (user_id)
-            ON UPDATE CASCADE ON DELETE CASCADE
 
         );
         """
-     
+
     )
     conn = None
     try:
@@ -41,7 +39,6 @@ def create_tables():
         cur = conn.cursor()
         # create table one by one
         for command in commands:
-            print(command)
             cur.execute(command)
         # close communication with the PostgreSQL database server
         cur.close()
@@ -52,7 +49,7 @@ def create_tables():
     finally:
         if conn is not None:
             conn.close()
- 
- 
+
+
 if __name__ == '__main__':
     create_tables()
