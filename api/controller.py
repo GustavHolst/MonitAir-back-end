@@ -14,22 +14,24 @@ import json
 
 
 def insert_user(request):
-    user_id = request.json["user_id"]
-    first_name = request.json["first_name"]
-    surname = request.json["surname"]
-    email = request.json["email"]
-    sensor_id = request.json["sensor_id"]
-    username = request.json["username"]
-
-    new_user = User(user_id, first_name, surname, email, sensor_id, username)
     try:
-        db.session.add(new_user)
-        db.session.commit()
-    except IntegrityError:
-        db.session.rollback()
+        user_id = request.json["user_id"]
+        first_name = request.json["first_name"]
+        surname = request.json["surname"]
+        email = request.json["email"]
+        sensor_id = request.json["sensor_id"]
+        username = request.json["username"]
+        try:
+            new_user = User(user_id, first_name, surname, email, sensor_id, username)
+            db.session.add(new_user)
+            db.session.commit()
+            return user_schema.jsonify(new_user), 201
+        except IntegrityError:
+            db.session.rollback()
         return {"msg": "Username, Sensor ID, Email or User_ID already in use"}, 400
 
-    return user_schema.jsonify(new_user), 201
+    except KeyError:
+        return {"msg": "Info missing from post user request"}, 400
 
 
 def select_user(username):
