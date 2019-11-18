@@ -172,5 +172,8 @@ while True:
 
         r = requests.post(api_endpoint, json=sendup)
         print(now_time, r.status_code, r.text)
+        if(r.status_code == 404):
+            print("Device not registered, reattempting in 60 seconds...")
+            time.sleep(60)
     except KeyboardInterrupt:
         pass
