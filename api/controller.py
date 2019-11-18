@@ -7,7 +7,7 @@ from app import (
     readings_schema,
     db,
 )
-from flask import request, jsonify, abort
+from flask import request, jsonify
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from datetime import datetime, timedelta
 import json
@@ -27,10 +27,7 @@ def insert_user(request):
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
-        return (
-            jsonify({"Msg": "Username, Sensor ID, Email or User_ID already in use"}),
-            400,
-        )
+        return {"msg": "Username, Sensor ID, Email or User_ID already in use"}, 400
 
     return user_schema.jsonify(new_user), 201
 
@@ -88,8 +85,7 @@ def select_readings(sensor_id):
     result = readings_schema.dump(readings_for_sensor)
 
     if not len(result):
-        abort(404, "no readings")
-        # return {"msg": "no readings found for this sensor ID"}, 404
+        return {"msg": "no readings found for this sensor ID"}, 404
     return jsonify(result)
 
 
