@@ -35,6 +35,9 @@ def insert_user(request):
     except KeyError:
         return {"msg": "Info missing from post user request"}, 400
 
+    except:
+        return {"msg": "something else"}
+
 
 def select_user(username):
     user = User.query.filter_by(username=username).first()
@@ -56,9 +59,13 @@ def insert_reading(sensor_id):
         temp_mean = request.json["temp_mean"]
         pressure_mean = request.json["pressure_mean"]
         humidity_mean = request.json["humidity_mean"]
-        total_quality_mean = request.json["total_quality_mean"]
+        total_quality_mean = (100 - request.json["total_quality_mean"]) * 5
         new_reading = Reading(
-            temp_mean, pressure_mean, humidity_mean, total_quality_mean, sensor_id
+            round(temp_mean),
+            round(pressure_mean),
+            round(humidity_mean),
+            round(total_quality_mean),
+            sensor_id,
         )
         db.session.add(new_reading)
         db.session.commit()

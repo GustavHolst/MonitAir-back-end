@@ -39,10 +39,10 @@ class User(db.Model):
 # Reading Class / Model
 class Reading(db.Model):
     reading_id = db.Column(db.Integer, primary_key=True)
-    temp_mean = db.Column(db.Float)
-    pressure_mean = db.Column(db.Float)
-    humidity_mean = db.Column(db.Float)
-    total_quality_mean = db.Column(db.Float)
+    temp_mean = db.Column(db.Integer)
+    pressure_mean = db.Column(db.Integer)
+    humidity_mean = db.Column(db.Integer)
+    total_quality_mean = db.Column(db.Integer)
     sensor_id = db.Column(db.String(20), db.ForeignKey("user.sensor_id"))
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
