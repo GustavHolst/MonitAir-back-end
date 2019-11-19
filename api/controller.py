@@ -35,9 +35,6 @@ def insert_user(request):
     except KeyError:
         return {"msg": "Info missing from post user request"}, 400
 
-    except:
-        return {"msg": "something else"}
-
 
 def select_user(username):
     user = User.query.filter_by(username=username).first()
@@ -45,12 +42,14 @@ def select_user(username):
     if isinstance(user, User):
         return user_schema.jsonify(user)
 
-    return {"msg": "user not found"}, 404
+    return {"msg": "User not found"}, 404
 
 
 def select_all_users():
     all_users = User.query.all()
-    return users_schema.jsonify(all_users)
+    if len(all_users):
+        return users_schema.jsonify(all_users)
+    return {"msg": "No users in the database"}, 404
 
 
 def insert_reading(sensor_id):
@@ -61,7 +60,7 @@ def insert_reading(sensor_id):
         humidity_mean = request.json["humidity_mean"]
         total_quality_mean = (100 - request.json["total_quality_mean"]) * 5
         new_reading = Reading(
-            round(temp_mean),
+            round(temp_mean, 2),
             round(pressure_mean),
             round(humidity_mean),
             round(total_quality_mean),
@@ -75,10 +74,41 @@ def insert_reading(sensor_id):
     except KeyError:
         return {"msg": "Info missing from post reading request"}, 400
 
+    except TypeError:
+        return {"msg": "Readings provided must be numbers (Int or Float)"}, 400
+
+
+def select_most_recent_reading(sensor_id):
+    most_recent_reading = (
+        Reading.query.filter_by(sensor_id=sensor_id)
+        .order_by(Reading.timestamp.desc())
+        .first()
+    )
+    if not most_recent_reading:
+        return (
+            {"msg": "No readings found for this sensor ID"},
+            404,
+        )
+    return reading_schema.jsonify(most_recent_reading)
+
 
 def select_readings(sensor_id):
     try:
         measurement = request.args.get("measurement")
+
+        if (
+            measurement != "temp_mean"
+            and measurement != "pressure_mean"
+            and measurement != "humidity_mean"
+            and measurement != "total_quality_mean"
+        ):
+            return (
+                {
+                    "msg": "Measurement query must be: temp_mean, pressure_mean, humidity_mean or total_quality_mean"
+                },
+                400,
+            )
+
         lower_limit = request.args.get("lower_limit")[:10] + " 00:00:00"
         upper_limit = request.args.get("upper_limit")[:10] + " 23:59:59"
 
@@ -98,7 +128,7 @@ def select_readings(sensor_id):
 
         if not len(result):
             return (
-                {"msg": "no readings found for this sensor ID for the given timeframe"},
+                {"msg": "No readings found for this sensor ID for the given timeframe"},
                 404,
             )
         return jsonify(result)
@@ -106,7 +136,7 @@ def select_readings(sensor_id):
     except TypeError:
         return (
             {
-                "msg": "Bad Request: queries must include a measurement, date upper_limit and date lower_limit"
+                "msg": "Queries must include a measurement, date upper_limit and date lower_limit"
             },
             400,
         )
@@ -114,21 +144,15 @@ def select_readings(sensor_id):
     except AttributeError:
         return (
             {
-                "msg": "Bad Request: queries must include a measurement, date upper_limit and date lower_limit"
+                "msg": "Queries must include a measurement, date upper_limit and date lower_limit"
             },
             400,
         )
 
-
-def select_most_recent_reading(sensor_id):
-    most_recent_reading = (
-        Reading.query.filter_by(sensor_id=sensor_id)
-        .order_by(Reading.timestamp.desc())
-        .first()
-    )
-    if not most_recent_reading:
+    except ValueError:
         return (
-            {"msg": "no readings found for this sensor ID"},
-            404,
+            {
+                "msg": "upper_limit & lower_limit must be formatted 'YYYY-MM-DD' (time can be suffixed but will be ignored)"
+            },
+            400,
         )
-    return reading_schema.jsonify(most_recent_reading)
