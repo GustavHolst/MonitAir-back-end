@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # main python library and time modules
 import bme680
+from drv8830 import DRV8830, I2C_ADDR1
 import time
 import requests
 import statistics
-
+motor = DRV8830(I2C_ADDR1)
 # get serial /proc/cpuinfo
 
 
@@ -12,8 +13,8 @@ def getserial():
     piSerialNum = None
     try:
         cpuInfoFile = open('/proc/cpuinfo', 'r')
-        for eachLine in cpuInfoFile:
-            if eachLine[0:6] == 'Serial':
+        for line in cpuInfoFile:
+            if line[0:6] == 'Serial':
                 piSerialNum = line[10:26]
         cpuInfoFile.close()
     except:
@@ -102,7 +103,7 @@ while True:
         now_time = time.time()
 
         # set the delay between server POST requests
-        post_interval = 10  # seconds
+        post_interval = 60  # seconds
 
         # create some empty list for the averages
         temp_list = []
@@ -145,7 +146,12 @@ while True:
                 # Calculate air_quality_score.
                 air_quality_score = hum_score + gas_score
 
-                time.sleep(1)
+                if air_quality_score < 80:
+                    motor.forward()
+                else:
+                    motor.brake()
+                    
+                time.sleep(1) 
                 now_time = time.time()
 
                 totalQuality_list.append(air_quality_score)
@@ -154,6 +160,13 @@ while True:
             pressure_mean = statistics.mean(pressure_list)
             humidity_mean = statistics.mean(humidity_list)
             totalQuality_mean = statistics.mean(totalQuality_list)
+            """
+            print(totalQuality_mean)
+            if totalQuality_mean < 80:
+                motor.forward()
+            else:
+                motor.brake()
+             """   
         except statistics.StatisticsError:
             pass
         sendup = {'temp_mean': round(temp_mean, 2),
