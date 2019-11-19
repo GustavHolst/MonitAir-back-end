@@ -24,6 +24,7 @@ class User(db.Model):
     email = db.Column(db.String(60), unique=True)
     sensor_id = db.Column(db.String(20), unique=True, primary_key=True)
     username = db.Column(db.String(40), unique=True)
+    readings = db.relationship("Reading", backref="user", lazy="select")
 
     def __init__(self, user_id, first_name, surname, email, sensor_id, username):
         self.user_id = user_id
