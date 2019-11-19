@@ -60,7 +60,7 @@ def insert_reading(sensor_id):
         humidity_mean = request.json["humidity_mean"]
         total_quality_mean = (100 - request.json["total_quality_mean"]) * 5
         new_reading = Reading(
-            round(temp_mean),
+            round(temp_mean, 2),
             round(pressure_mean),
             round(humidity_mean),
             round(total_quality_mean),
