@@ -126,3 +126,81 @@ stages:
       status_code: 404
       body:
         msg: User not found
+
+---
+test_name: Successfully handle a POST reading request
+stages:
+  - name: Returns a 201 when given a valid JSON reading and sensor_id to the POST reading endpoint
+    request:
+      url: http://127.0.0.1:5000/reading/abc123
+      json:
+        temp_mean: 20.03
+        total_quality_mean: 80
+        pressure_mean: 100
+        humidity_mean: 40
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      body:
+        temp_mean: 20.03
+        total_quality_mean: 100 # Formatted by the back-end
+        pressure_mean: 100.0
+        humidity_mean: 40
+        reading_id: 1
+        timestamp: !anything
+
+---
+test_name: Reject an invalid POST reading request (missing properties)
+stages:
+  - name: Returns a 400 when given a JSON reading with missing properties to the POST reading endpoint
+    request:
+      url: http://127.0.0.1:5000/reading/abc123
+      json:
+        temp_mean: 20.03
+        total_quality_mean: 80
+        pressure_mean: 100
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 400
+      body:
+        msg: Info missing from post reading request
+
+---
+test_name: Reject an invalid POST reading request (bad value(s))
+stages:
+  - name: Returns a 400 when given a JSON reading with all properties but invalid values to the POST reading endpoint
+    request:
+      url: http://127.0.0.1:5000/reading/abc123
+      json:
+        temp_mean: 20.03
+        total_quality_mean: 80
+        pressure_mean: 100
+        humidity_mean: a string instead of a number
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 400
+      body:
+        msg: Readings provided must be numbers (Int or Float)
+
+---
+test_name: Successfully handle a valid most recent reading request
+stages:
+  - name: Returns a 200 when a valid most_recent_reading GET request is made
+    request:
+      url: http://127.0.0.1:5000/most_recent_reading/abc123
+      method: GET
+    response:
+      status_code: 200
+      body:
+        temp_mean: 20.03
+        total_quality_mean: 100
+        pressure_mean: 100.0
+        humidity_mean: 40
+        reading_id: 1
+        timestamp: !anything
