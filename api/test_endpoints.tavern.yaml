@@ -1,4 +1,16 @@
 # Drop and create database before running this file
+test_name: No users found
+stages:
+  - name: Returns a 404 when GET /users is requested and there are no users in the db
+    request:
+      url: http://127.0.0.1:5000/user
+      method: GET
+    response:
+      status_code: 404
+      body:
+        msg: No users in the database
+
+---
 test_name: Successfully handle POST user
 stages:
   - name: Returns a 201 and a new user object when a valid user is requested
@@ -64,3 +76,24 @@ stages:
       status_code: 400
       body:
         msg: Username, Sensor ID, Email or User_ID already in use
+
+---
+test_name: Provide a list of all users in the db
+stages:
+  - name: Returns a 200 and an array of all users in the database
+    request:
+      url: http://127.0.0.1:5000/user
+      method: GET
+    response:
+      status_code: 200
+      body:
+        [
+          {
+            'email': 'eamon@s.com',
+            'first_name': 'Eamon',
+            'sensor_id': 'abc123',
+            'surname': 'S',
+            'user_id': 'hfej4ojo3j53353ni3nir3',
+            'username': 'eamon',
+          },
+        ]
