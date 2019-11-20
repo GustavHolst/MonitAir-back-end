@@ -1,33 +1,5 @@
-# Every test file has one or more tests...
-# test_name: Get some fake data from the JSON placeholder API
-
-# ...and each test has one or more stages (e.g. an HTTP request)
-# stages:
-#   - name: Make sure we have the right ID
-
-#     # Define the request to be made...
-#     request:
-#       url: http://127.0.0.1:5000/user
-#       method: GET
-
-#     # ...and the expected response code and body
-#     response:
-#       status_code: 200
-#       body:
-#         [
-#           {
-#             'email': 'Asd@asd.com',
-#             'first_name': 'Rebecca',
-#             'sensor_id': '00000000b7b25684',
-#             'surname': 'Collins',
-#             'user_id': '6nY4fpnd3rP3LM4W6GAwlRlJ5Vp1',
-#             'username': 'QueenOfFirebase',
-#           },
-#         ]
-
----
-test_name: Returns a 201 and a new user object when a valid user is requested
-
+# Drop and create database before running this file
+test_name: Successfully handle POST user
 stages:
   - name: Returns a 201 and a new user object when a valid user is requested
     request:
@@ -51,3 +23,44 @@ stages:
         username: eamon
         sensor_id: abc123
         user_id: hfej4ojo3j53353ni3nir3
+
+---
+test_name: Reject bad POST user request
+stages:
+  - name: Returns a 400 when a request is sent without one of the required fields
+    request:
+      url: http://127.0.0.1:5000/user
+      json:
+        first_name: Eamon
+        surname: S
+        email: somethingelse@something.com
+        username: noteamon
+        sensor_id: xyz321
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 400
+      body:
+        msg: Info missing from post user request
+
+---
+test_name: Reject non-unique POST user request
+stages:
+  - name: Returns a 201 and a new user object when a valid user is requested
+    request:
+      url: http://127.0.0.1:5000/user
+      json:
+        first_name: Eamon
+        surname: S
+        email: eamon@s.com
+        username: eamon
+        sensor_id: abc123
+        user_id: hfej4ojo3j53353ni3nir3
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 400
+      body:
+        msg: Username, Sensor ID, Email or User_ID already in use
