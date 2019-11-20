@@ -1,5 +1,5 @@
 # Drop and create database before running this file
-test_name: No users found
+test_name: Successfully handle GET users when db is empty
 stages:
   - name: Returns a 404 when GET /users is requested and there are no users in the db
     request:
@@ -97,3 +97,32 @@ stages:
             'username': 'eamon',
           },
         ]
+
+---
+test_name: Return a requested user object
+stages:
+  - name: Returns a 200 and a user object when given a valid username on the path of a GET request
+    request:
+      url: http://127.0.0.1:5000/user/eamon
+      method: GET
+    response:
+      status_code: 200
+      body:
+        first_name: Eamon
+        surname: S
+        email: eamon@s.com
+        username: eamon
+        sensor_id: abc123
+        user_id: hfej4ojo3j53353ni3nir3
+
+---
+test_name: Reject a request for a non-existent user
+stages:
+  - name: Returns a 404 when given a non-existent username on the path of a GET request
+    request:
+      url: http://127.0.0.1:5000/user/jonno
+      method: GET
+    response:
+      status_code: 404
+      body:
+        msg: User not found
