@@ -284,3 +284,23 @@ stages:
       status_code: 400
       body:
         msg: upper_limit & lower_limit must be formatted 'YYYY-MM-DD' (time can be suffixed but will be ignored)
+
+---
+test_name: Reject non-approved methods
+stages:
+  - name: Returns a 405 when requests for a non-approved method is made
+    request:
+      url: http://127.0.0.1:5000/user/eamon
+      method: DELETE
+    response:
+      status_code: 405
+
+---
+test_name: Reject non-existent url paths
+stages:
+  - name: Returns a 404 when a request of any method is made on a non-approved path
+    request:
+      url: http://127.0.0.1:5000/something/
+      method: GET
+    response:
+      status_code: 404
