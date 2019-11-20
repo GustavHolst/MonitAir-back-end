@@ -1,0 +1,306 @@
+# Drop and create database before running this file by doing these steps:
+
+# 1. Enter your virtual environment in the command line
+# 2. Run "python3" to open the python shell
+# 3. Run the following commands:
+# >>> from app import db
+# >>> db.drop_all()
+# >>> db.create_all()
+# 4. Exit the shell with ">>> exit()"
+
+test_name: Successfully handle GET users when db is empty
+stages:
+  - name: Returns a 404 when GET /users is requested and there are no users in the db
+    request:
+      url: http://127.0.0.1:5000/user
+      method: GET
+    response:
+      status_code: 404
+      body:
+        msg: No users in the database
+
+---
+test_name: Successfully handle POST user
+stages:
+  - name: Returns a 201 and a new user object when a valid user is requested
+    request:
+      url: http://127.0.0.1:5000/user
+      json:
+        first_name: Eamon
+        surname: S
+        email: eamon@s.com
+        username: eamon
+        sensor_id: abc123
+        user_id: hfej4ojo3j53353ni3nir3
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      body:
+        first_name: Eamon
+        surname: S
+        email: eamon@s.com
+        username: eamon
+        sensor_id: abc123
+        user_id: hfej4ojo3j53353ni3nir3
+
+---
+test_name: Reject bad POST user request
+stages:
+  - name: Returns a 400 when a request is sent without one of the required fields
+    request:
+      url: http://127.0.0.1:5000/user
+      json:
+        first_name: Eamon
+        surname: S
+        email: somethingelse@something.com
+        username: noteamon
+        sensor_id: xyz321
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 400
+      body:
+        msg: Info missing from post user request
+
+---
+test_name: Reject non-unique POST user request
+stages:
+  - name: Returns a 201 and a new user object when a valid user is requested
+    request:
+      url: http://127.0.0.1:5000/user
+      json:
+        first_name: Eamon
+        surname: S
+        email: eamon@s.com
+        username: eamon
+        sensor_id: abc123
+        user_id: hfej4ojo3j53353ni3nir3
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 400
+      body:
+        msg: Username, Sensor ID, Email or User_ID already in use
+
+---
+test_name: Provide a list of all users in the db
+stages:
+  - name: Returns a 200 and an array of all users in the database
+    request:
+      url: http://127.0.0.1:5000/user
+      method: GET
+    response:
+      status_code: 200
+      body:
+        [
+          {
+            'email': 'eamon@s.com',
+            'first_name': 'Eamon',
+            'sensor_id': 'abc123',
+            'surname': 'S',
+            'user_id': 'hfej4ojo3j53353ni3nir3',
+            'username': 'eamon',
+          },
+        ]
+
+---
+test_name: Return a requested user object
+stages:
+  - name: Returns a 200 and a user object when given a valid username on the path of a GET request
+    request:
+      url: http://127.0.0.1:5000/user/eamon
+      method: GET
+    response:
+      status_code: 200
+      body:
+        first_name: Eamon
+        surname: S
+        email: eamon@s.com
+        username: eamon
+        sensor_id: abc123
+        user_id: hfej4ojo3j53353ni3nir3
+
+---
+test_name: Reject a request for a non-existent user
+stages:
+  - name: Returns a 404 when given a non-existent username on the path of a GET request
+    request:
+      url: http://127.0.0.1:5000/user/jonno
+      method: GET
+    response:
+      status_code: 404
+      body:
+        msg: User not found
+
+---
+test_name: Successfully handle a POST reading request
+stages:
+  - name: Returns a 201 when given a valid JSON reading and sensor_id to the POST reading endpoint
+    request:
+      url: http://127.0.0.1:5000/reading/abc123
+      json:
+        temp_mean: 20.03
+        total_quality_mean: 80
+        pressure_mean: 100
+        humidity_mean: 40
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 201
+      body:
+        temp_mean: 20.03
+        total_quality_mean: 100 # Formatted by the back-end
+        pressure_mean: 100.0
+        humidity_mean: 40
+        reading_id: 1
+        timestamp: !anything
+
+---
+test_name: Reject an invalid POST reading request (missing properties)
+stages:
+  - name: Returns a 400 when given a JSON reading with missing properties to the POST reading endpoint
+    request:
+      url: http://127.0.0.1:5000/reading/abc123
+      json:
+        temp_mean: 20.03
+        total_quality_mean: 80
+        pressure_mean: 100
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 400
+      body:
+        msg: Info missing from post reading request
+
+---
+test_name: Reject an invalid POST reading request (bad value(s))
+stages:
+  - name: Returns a 400 when given a JSON reading with all properties but invalid values to the POST reading endpoint
+    request:
+      url: http://127.0.0.1:5000/reading/abc123
+      json:
+        temp_mean: 20.03
+        total_quality_mean: 80
+        pressure_mean: 100
+        humidity_mean: a string instead of a number
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 400
+      body:
+        msg: Readings provided must be numbers (Int or Float)
+
+---
+test_name: Successfully handle a valid most recent reading request
+stages:
+  - name: Returns a 200 when a valid most_recent_reading GET request is made
+    request:
+      url: http://127.0.0.1:5000/most_recent_reading/abc123
+      method: GET
+    response:
+      status_code: 200
+      body:
+        temp_mean: 20.03
+        total_quality_mean: 100
+        pressure_mean: 100.0
+        humidity_mean: 40
+        reading_id: 1
+        timestamp: !anything
+
+---
+test_name: Reject a request for the most recent reading for a sensor which does not have any readings
+stages:
+  - name: Returns a 404 when a most_recent_reading GET request is made for a sensor_id with no readings
+    request:
+      url: http://127.0.0.1:5000/most_recent_reading/xyz321
+      method: GET
+    response:
+      status_code: 404
+      body:
+        msg: No readings found for this sensor ID
+
+---
+test_name: Return a list of all readings when given a valid query
+stages:
+  - name: Returns a 200 and an array of all readings for the specified measurement when given a valid GET readings query
+    request:
+      url: http://127.0.0.1:5000/reading/abc123?measurement=temp_mean&lower_limit=2019-11-19&upper_limit=2019-11-20
+      method: GET
+    response:
+      status_code: 200
+      body: [{ temp_mean: 20.03, timestamp: !anything  }]
+
+---
+test_name: Reject an otherwise valid request for readings for a non-existent sensor
+stages:
+  - name: Returns a 404 when given a valid GET request for readings for a non-existent sensor
+    request:
+      url: http://127.0.0.1:5000/reading/xyz321?measurement=temp_mean&lower_limit=2019-11-19&upper_limit=2019-11-20
+      method: GET
+    response:
+      status_code: 404
+      body:
+        msg: No readings found for this sensor ID for the given timeframe
+
+---
+test_name: Reject an invalid readings request (missing param(s))
+stages:
+  - name: Returns a 400 when given an invalid GET request for readings for an existent sensor
+    request:
+      url: http://127.0.0.1:5000/reading/abc123?measurement=temp_mean&upper_limit=2019-11-20
+      method: GET
+    response:
+      status_code: 400
+      body:
+        msg: Queries must include a measurement, date upper_limit and date lower_limit
+
+---
+test_name: Reject an invalid readings request (bad measurement)
+stages:
+  - name: Returns a 400 when given an invalid GET request for readings for an existent sensor
+    request:
+      url: http://127.0.0.1:5000/reading/abc123?measurement=temperature&lower_limit=2019-11-19&upper_limit=2019-11-20
+      method: GET
+    response:
+      status_code: 400
+      body:
+        msg: 'Measurement query must be: temp_mean, pressure_mean, humidity_mean or total_quality_mean'
+
+---
+test_name: Reject an invalid readings request (dates in incorrect format)
+stages:
+  - name: Returns a 400 when given an invalid GET request for readings due to incorrectly formatted dates
+    request:
+      url: http://127.0.0.1:5000/reading/abc123?measurement=temp_mean&lower_limit=19-11-2019&upper_limit=20-11-2019
+      method: GET
+    response:
+      status_code: 400
+      body:
+        msg: upper_limit & lower_limit must be formatted 'YYYY-MM-DD' (time can be suffixed but will be ignored)
+
+---
+test_name: Reject non-approved methods
+stages:
+  - name: Returns a 405 when requests for a non-approved method is made
+    request:
+      url: http://127.0.0.1:5000/user/eamon
+      method: DELETE
+    response:
+      status_code: 405
+
+---
+test_name: Reject non-existent url paths
+stages:
+  - name: Returns a 404 when a request of any method is made on a non-approved path
+    request:
+      url: http://127.0.0.1:5000/something/
+      method: GET
+    response:
+      status_code: 404
