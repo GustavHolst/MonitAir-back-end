@@ -1,4 +1,13 @@
-# Drop and create database before running this file
+# Drop and create database before running this file by doing these steps:
+
+# 1. Enter your virtual environment in the command line
+# 2. Run "python3" to open the python shell
+# 3. Run the following commands:
+# >>> from app import db
+# >>> db.drop_all()
+# >>> db.create_all()
+# 4. Exit the shell with ">>> exit()"
+
 test_name: Successfully handle GET users when db is empty
 stages:
   - name: Returns a 404 when GET /users is requested and there are no users in the db
@@ -216,3 +225,62 @@ stages:
       status_code: 404
       body:
         msg: No readings found for this sensor ID
+
+---
+test_name: Return a list of all readings when given a valid query
+stages:
+  - name: Returns a 200 and an array of all readings for the specified measurement when given a valid GET readings query
+    request:
+      url: http://127.0.0.1:5000/reading/abc123?measurement=temp_mean&lower_limit=2019-11-19&upper_limit=2019-11-20
+      method: GET
+    response:
+      status_code: 200
+      body: [{ temp_mean: 20.03, timestamp: !anything  }]
+
+---
+test_name: Reject an otherwise valid request for readings for a non-existent sensor
+stages:
+  - name: Returns a 404 when given a valid GET request for readings for a non-existent sensor
+    request:
+      url: http://127.0.0.1:5000/reading/xyz321?measurement=temp_mean&lower_limit=2019-11-19&upper_limit=2019-11-20
+      method: GET
+    response:
+      status_code: 404
+      body:
+        msg: No readings found for this sensor ID for the given timeframe
+
+---
+test_name: Reject an invalid readings request (missing param(s))
+stages:
+  - name: Returns a 400 when given an invalid GET request for readings for an existent sensor
+    request:
+      url: http://127.0.0.1:5000/reading/abc123?measurement=temp_mean&upper_limit=2019-11-20
+      method: GET
+    response:
+      status_code: 400
+      body:
+        msg: Queries must include a measurement, date upper_limit and date lower_limit
+
+---
+test_name: Reject an invalid readings request (bad measurement)
+stages:
+  - name: Returns a 400 when given an invalid GET request for readings for an existent sensor
+    request:
+      url: http://127.0.0.1:5000/reading/abc123?measurement=temperature&lower_limit=2019-11-19&upper_limit=2019-11-20
+      method: GET
+    response:
+      status_code: 400
+      body:
+        msg: 'Measurement query must be: temp_mean, pressure_mean, humidity_mean or total_quality_mean'
+
+---
+test_name: Reject an invalid readings request (dates in incorrect format)
+stages:
+  - name: Returns a 400 when given an invalid GET request for readings due to incorrectly formatted dates
+    request:
+      url: http://127.0.0.1:5000/reading/abc123?measurement=temp_mean&lower_limit=19-11-2019&upper_limit=20-11-2019
+      method: GET
+    response:
+      status_code: 400
+      body:
+        msg: upper_limit & lower_limit must be formatted 'YYYY-MM-DD' (time can be suffixed but will be ignored)
